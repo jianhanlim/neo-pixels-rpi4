@@ -6,6 +6,10 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# MUST INSTALL VIA SUDO, LED_CONTROLLER.py MUST RUN WITH SUDO
+sudo apt install -y python3-pip
+sudo pip3 install --no-cache-dir adafruit-blinka==8.30.0 adafruit-circuitpython-neopixel==6.3.11 adafruit-circuitpython-neopixel-spi==1.0.9
+
 CONFIG_FILE="/boot/config.txt"
 
 # Check if /boot/config.txt exists
