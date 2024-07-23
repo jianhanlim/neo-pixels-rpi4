@@ -9,7 +9,7 @@ import board
 import neopixel
 
 class LedController:
-    def __init__(self, pixel_pin, num_pixels, brightness=0.2, order=neopixel.GRB):
+    def __init__(self, pixel_pin, num_pixels, brightness=0.2, order=neopixel.RGB):
         self.pixel_pin = pixel_pin
         self.num_pixels = num_pixels
         self.ORDER = order
