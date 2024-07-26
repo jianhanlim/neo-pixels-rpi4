@@ -4,9 +4,14 @@
 # SPDX-License-Identifier: MIT
 
 # Simple test for NeoPixels on Raspberry Pi
+# with signal handling methods
+# to start led: kill -SIGUSR1 <process id>
+# to stop led: kill -SIGUSR2 <process id>
 import time
 import board
 import neopixel
+import signal
+import os
 
 class LedController:
     def __init__(self, pixel_pin, num_pixels, brightness=0.2, order=neopixel.RGBW): # circle led needs rgbw
@@ -16,6 +21,7 @@ class LedController:
         self.pixels = neopixel.NeoPixel(
             self.pixel_pin, self.num_pixels, brightness=brightness, auto_write=False, pixel_order=self.ORDER
         )
+        self.running = False
 
     def wheel(self, pos):
         # Input a value 0 to 255 to get a color value.
@@ -68,8 +74,41 @@ class LedController:
             # time.sleep(1)
             # self.rainbow_cycle(0.001)  # rainbow cycle with 1ms delay per step
 
+    def start(self):
+        self.running = True
+        while self.running:
+            self.show_white()
+
+    def stop(self):
+        self.running = False
+        time.sleep(0.5)
+        while not self.running:
+            self.pixels.fill((0, 0, 0, 0))
+            self.pixels.show()
+
+def handle_sigusr1(signum, frame):
+    print("SIGUSR1 received: Starting LED effect")
+    led_controller.start()
+
+def handle_sigusr2(signum, frame):
+    print("SIGUSR2 received: Stopping LED effect")
+    led_controller.stop()
+
 if __name__ == "__main__":
     pixel_pin = board.D18
     num_pixels = 16
     led_controller = LedController(pixel_pin, num_pixels)
-    led_controller.run()
+
+    #led_controller.run()
+    
+    # Register signal handlers
+    signal.signal(signal.SIGUSR1, handle_sigusr1)
+    signal.signal(signal.SIGUSR2, handle_sigusr2)
+
+    print(f"Process ID: {os.getpid()}")
+    print("Waiting for SIGUSR1 and SIGUSR2 signals...")
+
+    # Keep the program running to listen for signals
+    while True:
+        time.sleep(1)
+        
